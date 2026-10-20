@@ -1,0 +1,1293 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>VisionDrive AI - Live Vision</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B1020}
+.vd{--bg:#0B1020;--surf:#121A2E;--surf2:#0F1627;--line:#1F2A44;--tx:#E6EAF2;--mut:#8B96AD;--cy:#22D3EE;--bl:#3B82F6;--ok:#22C55E;--warn:#F59E0B;--bad:#EF4444;
+font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--tx);box-sizing:border-box;
+background:radial-gradient(1100px 520px at 88% -8%,rgba(34,211,238,.13),transparent 60%),radial-gradient(900px 520px at 0% 100%,rgba(59,130,246,.13),transparent 60%),linear-gradient(rgba(34,211,238,.035) 1px,transparent 1px) 0 0/44px 44px,linear-gradient(90deg,rgba(34,211,238,.035) 1px,transparent 1px) 0 0/44px 44px,#0B1020}
+.vd *{box-sizing:border-box}
+.lv-ok{--lv:#22C55E;--lvt:#4ADE80;--lvbg:rgba(34,197,94,.14)}
+.lv-warn{--lv:#F59E0B;--lvt:#FBBF24;--lvbg:rgba(245,158,11,.14)}
+.lv-bad{--lv:#EF4444;--lvt:#F87171;--lvbg:rgba(239,68,68,.16)}
+.lv-idle{--lv:#64748B;--lvt:#94A3B8;--lvbg:rgba(100,116,139,.16)}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:700}
+.card{background:linear-gradient(180deg,rgba(18,26,46,.94),rgba(15,22,39,.94));border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.03);transition:border-color .2s,transform .2s}
+.card:hover{border-color:rgba(34,211,238,.35)}
+.sb{flex:0 0 auto;display:flex;flex-direction:column;gap:18px;padding:18px 14px;background:rgba(9,13,26,.72);border-right:1px solid var(--line);transition:width .25s ease}
+.sb-open{width:260px}
+.sb-closed{width:72px}
+.sb-closed .lbl,.sb-closed .bubble,.sb-closed .brandtxt,.sb-closed .grp{display:none}
+.sb-closed .nav{justify-content:center;padding:10px 0}
+.sb-closed .botcard{justify-content:center;padding:8px 0}
+.sb-closed .chev{transform:rotate(180deg)}
+.nav{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 12px;border-radius:12px;color:var(--mut);border:1px solid transparent;background:none;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:left;position:relative;transition:background .2s,color .2s}
+.nav:hover{background:rgba(34,211,238,.07);color:var(--tx)}
+.nav:focus-visible,.btn:focus-visible,.seg:focus-visible,.chip:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.nav.on{background:rgba(34,211,238,.1);color:var(--tx);border-color:rgba(34,211,238,.25)}
+.nav.on::before{content:"";position:absolute;left:-15px;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--cy);box-shadow:0 0 12px var(--cy)}
+.nav svg{flex:0 0 auto}
+.grp{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#5b6784;font-weight:700;padding:0 12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 16px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:#0F1627;color:var(--tx);font:600 13px 'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:border-color .2s,background .2s,transform .2s,box-shadow .2s}
+.btn:hover{border-color:rgba(34,211,238,.55);background:rgba(34,211,238,.08);transform:translateY(-1px)}
+.btn-pri{background:linear-gradient(135deg,#22D3EE,#3B82F6);color:#041018;border-color:transparent}
+.btn-pri:hover{background:linear-gradient(135deg,#67e8f9,#60a5fa);box-shadow:0 0 22px rgba(34,211,238,.45)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.segs{display:inline-flex;gap:4px;padding:3px;border-radius:14px;background:#0F1627;border:1px solid var(--line)}
+.seg{min-height:40px;padding:0 14px;border-radius:11px;border:0;background:none;color:var(--mut);font:600 13px 'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:background .2s,color .2s}
+.seg:hover{color:var(--tx);background:rgba(34,211,238,.07)}
+.seg.on{background:rgba(34,211,238,.16);color:#E6FBFF;box-shadow:inset 0 0 0 1px rgba(34,211,238,.4)}
+.pill{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:12px;background:#0F1627;border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--tx)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:ping 1.6s infinite}
+.dot.off{background:#64748B;animation:none}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.frame{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#050a18;border:1px solid var(--lv);box-shadow:0 0 0 1px var(--lvbg),0 0 36px var(--lvbg);transition:border-color .3s,box-shadow .3s}
+.lv-bad .frame{animation:pulseb 1.2s ease-in-out infinite}
+@keyframes pulseb{0%,100%{box-shadow:0 0 0 1px rgba(239,68,68,.35),0 0 24px rgba(239,68,68,.25)}50%{box-shadow:0 0 0 2px rgba(239,68,68,.6),0 0 52px rgba(239,68,68,.45)}}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.55) 100%);pointer-events:none}
+.scan{position:absolute;left:0;right:0;height:90px;top:-90px;background:linear-gradient(180deg,transparent,rgba(34,211,238,.13),transparent);animation:scan 4.5s linear infinite;pointer-events:none}
+@keyframes scan{to{top:100%}}
+.roi{position:absolute;left:14%;top:36%;width:72%;height:58%;border:1.5px dashed rgba(34,211,238,.45);border-radius:6px;pointer-events:none}
+.roi span{position:absolute;left:8px;top:-9px;padding:0 6px;background:#07101f;color:var(--cy);font:700 9px 'JetBrains Mono',monospace;letter-spacing:.14em}
+.cn{position:absolute;width:22px;height:22px;border-color:var(--cy);border-style:solid;border-width:0;pointer-events:none;opacity:.9}
+.cn.tl{left:10px;top:10px;border-top-width:2px;border-left-width:2px}
+.cn.tr{right:10px;top:10px;border-top-width:2px;border-right-width:2px}
+.cn.bl{left:10px;bottom:10px;border-bottom-width:2px;border-left-width:2px}
+.cn.br{right:10px;bottom:10px;border-bottom-width:2px;border-right-width:2px}
+.veh{position:absolute;border-radius:5px;background:rgba(8,13,28,.72);box-shadow:inset 0 0 0 1px rgba(148,163,184,.18);transition:left .9s linear,top .9s linear}
+.veh i{position:absolute;bottom:20%;width:20%;height:12%;background:#ff5d6c;border-radius:2px;box-shadow:0 0 8px #ff3b4f}
+.veh i:first-child{left:10%}
+.veh i:last-child{right:10%}
+.bb{position:absolute;inset:-3px;border:1.5px solid var(--cy);border-radius:4px;box-shadow:0 0 10px rgba(34,211,238,.4)}
+.bl{position:absolute;left:-3px;bottom:100%;margin-bottom:4px;white-space:nowrap;padding:2px 6px;border-radius:4px 4px 4px 0;background:var(--cy);color:#031018;font:700 10px 'JetBrains Mono',monospace}
+.fchip{position:absolute;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:rgba(7,12,26,.72);backdrop-filter:blur(8px);border:1px solid rgba(34,211,238,.28);font-size:12px;font-weight:700}
+.sign{position:absolute;right:14px;bottom:14px;width:64px;height:64px;border-radius:50%;background:#fff;border:6px solid #E11D2E;display:flex;align-items:center;justify-content:center;color:#0b0f1a;font:800 22px 'JetBrains Mono',monospace;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.banner{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:12px;background:var(--lvbg);border:1px solid var(--lv);color:var(--lvt);backdrop-filter:blur(8px);font-size:13px;font-weight:800;letter-spacing:.06em;white-space:nowrap}
+.lv-bad .banner{animation:blink 1s ease-in-out infinite}
+@keyframes blink{50%{opacity:.55}}
+.lvchip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:99px;background:var(--lvbg);color:var(--lvt);border:1px solid var(--lv);font-size:11px;font-weight:800;letter-spacing:.08em}
+.garc{stroke:var(--lv);filter:drop-shadow(0 0 6px var(--lv));transition:stroke-dashoffset .6s ease,stroke .3s}
+.lv-bad .garc{animation:blink 1s ease-in-out infinite}
+.bar{display:grid;grid-template-columns:128px 1fr 38px;gap:10px;align-items:center;font-size:12px;color:var(--mut)}
+.track{height:8px;border-radius:99px;background:#0B1020;overflow:hidden;border:1px solid #1a243d}
+.fill{height:100%;background:#2d3c63;border-radius:99px;transition:width .6s ease}
+.bar.on{color:var(--tx);font-weight:700}
+.bar.on .fill{background:linear-gradient(90deg,#3B82F6,#22D3EE);box-shadow:0 0 12px rgba(34,211,238,.6)}
+.chip{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:#0F1627;color:var(--mut);font:600 12px 'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:all .2s}
+.chip:hover{color:var(--tx);border-color:rgba(34,211,238,.5);background:rgba(34,211,238,.07)}
+.chip.on{color:#E6FBFF;border-color:var(--cy);background:rgba(34,211,238,.16);box-shadow:0 0 14px rgba(34,211,238,.25)}
+.cell{flex:1;height:26px;border-radius:3px;opacity:.32;transition:opacity .3s}
+.cell.past{opacity:.85}
+.cell.now{opacity:1;outline:2px solid #fff;outline-offset:1px;position:relative;z-index:1}
+.c0{background:#3B82F6}.c1{background:#22D3EE}.c2{background:#A78BFA}.c3{background:#F472B6}
+.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+input[type=range]{width:100%;accent-color:#22D3EE;height:28px;cursor:pointer}
+.stat{padding:10px 12px;border-radius:12px;background:#0F1627;border:1px solid var(--line)}
+.bubble{font-size:12px;line-height:1.4;color:var(--tx);padding:8px 12px;border-radius:12px 12px 12px 4px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.22)}
+.botcard{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:rgba(18,26,46,.8);border:1px solid var(--line);margin-top:auto}
+.bot{animation:bob 3.2s ease-in-out infinite;flex:0 0 auto}
+@keyframes bob{50%{transform:translateY(-3px)}}
+.ov{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,7,16,.72);backdrop-filter:blur(6px);animation:fade .2s ease}
+@keyframes fade{from{opacity:0}}
+.dlg{width:100%;max-width:520px;padding:24px;border-radius:20px;background:#0F1627;border:1px solid rgba(34,211,238,.35);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 40px rgba(34,211,238,.12);animation:pop .22s ease}
+@keyframes pop{from{transform:translateY(10px) scale(.97);opacity:0}}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:70;padding:12px 18px;border-radius:12px;background:#0F1627;border:1px solid var(--cy);color:var(--tx);font-size:13px;font-weight:600;box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 24px rgba(34,211,238,.2)}
+.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.row span:first-child{color:var(--mut)}
+.badge-s{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:99px;background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.5);color:#FBBF24;font-size:11px;font-weight:800;letter-spacing:.08em}
+.kpi{padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.cm{display:grid;grid-template-columns:128px repeat(5,minmax(52px,1fr));gap:4px;min-width:480px}
+.cm div{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:8px;font:700 13px 'JetBrains Mono',monospace}
+.cm .h{background:none;color:var(--mut);font:700 10px 'Plus Jakarta Sans',sans-serif;letter-spacing:.04em;text-align:center;min-height:36px}
+.cm .rl{justify-content:flex-start;background:none;color:var(--tx);font:700 12px 'Plus Jakarta Sans',sans-serif}
+.trow{display:grid;grid-template-columns:minmax(120px,1.6fr) repeat(3,minmax(56px,1fr));gap:8px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px;align-items:center}
+.trow.hd{color:var(--mut);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding-top:0}
+.trow:last-child{border-bottom:0}
+.frow{display:grid;grid-template-columns:44px 70px minmax(110px,1fr) minmax(110px,1fr);gap:8px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px;align-items:center}
+.frow.hd{color:var(--mut);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding-top:0}
+.sw-t{position:relative;flex:0 0 auto;width:52px;height:30px;border-radius:99px;border:1px solid var(--line);background:#0B1020;cursor:pointer;transition:background .2s,border-color .2s;padding:0}
+.sw-t::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#64748B;transition:transform .2s,background .2s}
+.sw-t.on{background:rgba(34,211,238,.2);border-color:var(--cy)}
+.sw-t.on::after{transform:translateX(22px);background:var(--cy);box-shadow:0 0 10px var(--cy)}
+.sw-t:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.srow:last-child{border-bottom:0}
+@media (max-width:860px){.sb-open,.sb-closed{width:100%}.sb-closed .lbl{display:inline}.nav.on::before{display:none}}
+@media (prefers-reduced-motion:reduce){.vd *{animation:none!important;transition:none!important}}
+.vd::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;opacity:0;transition:opacity .4s;background:radial-gradient(ellipse at center,transparent 55%,rgba(239,68,68,.4) 100%)}
+.lv-warn::before{opacity:.7;background:radial-gradient(ellipse at center,transparent 60%,rgba(245,158,11,.22) 100%)}
+.lv-bad::before{animation:edge 1.2s ease-in-out infinite}
+@keyframes edge{0%,100%{opacity:.35}50%{opacity:1}}
+.card{position:relative;animation:cardin .55s cubic-bezier(.2,.8,.2,1) both}
+.card:nth-child(2){animation-delay:.07s}
+.card:nth-child(3){animation-delay:.14s}
+.card:nth-child(4){animation-delay:.21s}
+@keyframes cardin{from{opacity:0;transform:translateY(14px)}}
+.card::before{content:"";position:absolute;left:14px;right:14px;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.65),transparent);opacity:.6;pointer-events:none}
+.card:hover{background:radial-gradient(240px circle at var(--cx,50%) var(--cy,50%),rgba(34,211,238,.12),transparent 70%),linear-gradient(180deg,rgba(18,26,46,.94),rgba(15,22,39,.94))}
+.btn-pri{position:relative;overflow:hidden}
+.btn-pri::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);transition:left .6s;pointer-events:none}
+.btn-pri:hover::after{left:140%}
+.nav{transition:background .2s,color .2s,transform .2s}
+.nav:hover{transform:translateX(3px)}
+.cell.now{animation:nowp 1s ease-in-out infinite}
+@keyframes nowp{50%{transform:scaleY(1.28)}}
+.bb{animation:bbp 1.8s ease-in-out infinite}
+@keyframes bbp{50%{opacity:.55}}
+.hx{background:linear-gradient(100deg,#E6EAF2 30%,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.vd ::-webkit-scrollbar{height:8px;width:8px}
+.vd ::-webkit-scrollbar-thumb{background:#243256;border-radius:99px}
+.vd ::-webkit-scrollbar-track{background:transparent}
+@media (prefers-reduced-motion:reduce){.vd::before,.card::before,.btn-pri::after{animation:none!important;transition:none!important}}
+
+/* ===== ULTRA v2 ===== */
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+.vd::after{content:"";position:fixed;inset:-20%;pointer-events:none;z-index:0;opacity:.9;
+background:radial-gradient(520px 420px at 18% 22%,rgba(34,211,238,.10),transparent 70%),radial-gradient(560px 460px at 82% 70%,rgba(167,139,250,.10),transparent 70%),radial-gradient(480px 400px at 60% 10%,rgba(59,130,246,.09),transparent 70%);
+animation:drift 26s ease-in-out infinite alternate;will-change:transform}
+@keyframes drift{to{transform:translate3d(4%,3%,0) scale(1.08)}}
+.vd>aside,.vd>main{position:relative;z-index:1}
+.card{backdrop-filter:blur(14px) saturate(140%);box-shadow:0 18px 50px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.02),inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 40px rgba(34,211,238,.02)}
+.card::after{content:"";position:absolute;inset:-1px;border-radius:17px;padding:1px;pointer-events:none;opacity:0;transition:opacity .35s;
+background:conic-gradient(from var(--ang),transparent 0deg,rgba(34,211,238,.9) 60deg,rgba(167,139,250,.7) 120deg,transparent 200deg,transparent 360deg);
+-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:spinang 4s linear infinite paused}
+.card:hover::after{opacity:1;animation-play-state:running}
+@keyframes spinang{to{--ang:360deg}}
+.eyebrow{display:inline-flex;align-items:center;gap:8px}
+.eyebrow::before{content:"";width:14px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--cy),transparent);flex:0 0 auto}
+.hx{background:linear-gradient(100deg,#fff 10%,#67e8f9 50%,#a78bfa 90%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:hxs 8s ease-in-out infinite alternate}
+@keyframes hxs{to{background-position:100% 0}}
+.kpi .mono,.kpi2{background:linear-gradient(180deg,#fff,#67e8f9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none}
+.kpi{position:relative;overflow:hidden}
+.kpi::after{display:none}
+.tick{position:relative;overflow:hidden;height:34px;border-radius:12px;border:1px solid var(--line);background:linear-gradient(90deg,rgba(34,211,238,.07),rgba(15,22,39,.6) 30%,rgba(167,139,250,.06));display:flex;align-items:center;-webkit-mask:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.tick-in{display:flex;gap:44px;white-space:nowrap;padding-left:20px;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#7e8bab;animation:tk 38s linear infinite;will-change:transform}
+.tick-in b{color:var(--cy);font-weight:700}
+@keyframes tk{to{transform:translateX(-50%)}}
+.sb{backdrop-filter:blur(16px);background:linear-gradient(180deg,rgba(12,18,36,.82),rgba(8,12,24,.88))}
+.nav.on{background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(34,211,238,.04));box-shadow:0 0 24px rgba(34,211,238,.12),inset 0 0 0 1px rgba(34,211,238,.25)}
+.nav.on svg{filter:drop-shadow(0 0 6px var(--cy));color:#67e8f9}
+.logo-ring{animation:lr 14s linear infinite;transform-origin:50% 50%}
+@keyframes lr{to{transform:rotate(360deg)}}
+.btn:active,.seg:active,.chip:active,.nav:active{transform:scale(.96)}
+.seg.on{background:linear-gradient(135deg,rgba(34,211,238,.28),rgba(59,130,246,.2));box-shadow:inset 0 0 0 1px rgba(34,211,238,.5),0 0 18px rgba(34,211,238,.2)}
+.pill{background:linear-gradient(180deg,rgba(18,26,46,.9),rgba(15,22,39,.9));box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.frame{box-shadow:0 0 0 1px var(--lvbg),0 0 48px var(--lvbg),0 24px 60px rgba(0,0,0,.5)}
+.frame::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+.retic{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;pointer-events:none;animation:ret 3.6s ease-in-out infinite}
+.retic i{position:absolute;background:var(--cy);opacity:.75}
+.retic i:nth-child(1){left:50%;top:0;width:1px;height:14px}
+.retic i:nth-child(2){left:50%;bottom:0;width:1px;height:14px}
+.retic i:nth-child(3){top:50%;left:0;height:1px;width:14px}
+.retic i:nth-child(4){top:50%;right:0;height:1px;width:14px}
+.retic::before{content:"";position:absolute;inset:18px;border:1px solid rgba(34,211,238,.45);border-radius:50%}
+@keyframes ret{50%{transform:scale(1.18);opacity:.55}}
+.rec{position:absolute;left:50%;top:16px;transform:translateX(-50%);display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:99px;background:rgba(7,12,26,.7);backdrop-filter:blur(8px);border:1px solid rgba(239,68,68,.45);font:700 10px 'JetBrains Mono',monospace;letter-spacing:.16em;color:#fca5a5}
+.rec i{width:7px;height:7px;border-radius:50%;background:#EF4444;box-shadow:0 0 10px #EF4444;animation:blink 1.1s ease-in-out infinite}
+.telem{position:absolute;left:16px;bottom:14px;display:flex;flex-direction:column;gap:2px;font:600 9px 'JetBrains Mono',monospace;letter-spacing:.1em;color:rgba(148,200,220,.75);pointer-events:none;text-shadow:0 0 6px rgba(0,0,0,.8)}
+.sign{box-shadow:0 6px 24px rgba(0,0,0,.55),0 0 0 3px rgba(255,255,255,.06),0 0 26px rgba(225,29,46,.35)}
+.lv-bad .sign{animation:signp 1s ease-in-out infinite}
+@keyframes signp{50%{transform:scale(1.1)}}
+.cn{animation:cnp 3s ease-in-out infinite}
+@keyframes cnp{50%{opacity:.4}}
+.bar.on .fill{background:linear-gradient(90deg,#3B82F6,#22D3EE,#a78bfa);background-size:200% 100%;animation:fl 3s linear infinite}
+@keyframes fl{to{background-position:200% 0}}
+.fill{position:relative}
+.gring{transform-origin:110px 110px;animation:lr 22s linear infinite}
+.gneedle{filter:drop-shadow(0 0 5px rgba(230,234,242,.8))}
+.garc{filter:drop-shadow(0 0 10px var(--lv)) drop-shadow(0 0 3px var(--lv))}
+.lv-ok .lvchip,.lv-warn .lvchip,.lv-bad .lvchip{box-shadow:0 0 16px var(--lvbg),inset 0 0 10px var(--lvbg)}
+.lv-bad .lvchip{animation:blink 1s ease-in-out infinite}
+.stat{background:linear-gradient(180deg,rgba(18,26,46,.9),rgba(11,16,32,.9));box-shadow:inset 0 1px 0 rgba(255,255,255,.05);transition:transform .2s,border-color .2s}
+.stat:hover{transform:translateY(-2px);border-color:rgba(34,211,238,.4)}
+.chip.on{background:linear-gradient(135deg,rgba(34,211,238,.28),rgba(59,130,246,.18))}
+.cell{transition:opacity .3s,transform .3s}
+.cell.now{box-shadow:0 0 14px rgba(255,255,255,.6)}
+.btn-pri{box-shadow:0 8px 24px rgba(34,211,238,.25),inset 0 1px 0 rgba(255,255,255,.4)}
+.dlg{background:linear-gradient(180deg,#121b31,#0d1424);backdrop-filter:blur(20px)}
+.ov{backdrop-filter:blur(10px)}
+.toast{animation:pop .25s ease}
+.cm div:not(.h):not(.rl){transition:transform .15s,box-shadow .15s}
+.cm div:not(.h):not(.rl):hover{transform:scale(1.08);box-shadow:0 0 16px rgba(34,211,238,.4);position:relative;z-index:2}
+.trow:not(.hd){transition:background .2s}
+.trow:not(.hd):hover{background:rgba(34,211,238,.05)}
+.vd ::selection{background:rgba(34,211,238,.35)}
+@media (prefers-reduced-motion:reduce){.vd::after,.card::after,.tick-in,.logo-ring,.gring,.retic,.hx{animation:none!important}}
+
+/* ===== ULTRA MAX v3 ===== */
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:linear-gradient(90deg,#3B82F6,#22D3EE);box-shadow:0 0 12px rgba(34,211,238,.35)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-7px;border-radius:50%;background:#E6FBFF;border:3px solid #22D3EE;box-shadow:0 0 0 4px rgba(34,211,238,.18),0 0 16px rgba(34,211,238,.8);transition:transform .15s}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.2)}
+input[type=range]::-moz-range-track{height:6px;border-radius:99px;background:linear-gradient(90deg,#3B82F6,#22D3EE)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#E6FBFF;border:3px solid #22D3EE;box-shadow:0 0 16px rgba(34,211,238,.8)}
+.frame::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;box-shadow:inset 0 0 90px var(--lvbg)}
+.hudc{border-color:color-mix(in srgb,var(--lv) 55%,var(--line));box-shadow:0 18px 50px rgba(0,0,0,.42),0 0 46px var(--lvbg),inset 0 1px 0 rgba(255,255,255,.06);transition:border-color .4s,box-shadow .4s}
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:14px;margin-left:2px}
+.eq i{width:3px;height:100%;border-radius:2px;background:var(--cy);transform-origin:50% 100%;animation:eq 1s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:-.3s}
+.eq i:nth-child(3){animation-delay:-.6s}
+.eq i:nth-child(4){animation-delay:-.15s}
+@keyframes eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.sb{position:relative}
+.sb::after{content:"";position:absolute;top:0;right:-1px;width:1px;height:100%;background:linear-gradient(180deg,transparent,#22D3EE,#8B5CF6,transparent);background-size:100% 220%;animation:sbl 7s linear infinite;pointer-events:none}
+@keyframes sbl{to{background-position:0 220%}}
+.cell:hover{transform:scaleY(1.2);opacity:1}
+.dlg{position:relative;overflow:hidden}
+.dlg::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--cy),#8B5CF6,transparent)}
+.row{transition:background .2s}
+.row:hover{background:rgba(34,211,238,.04)}
+.eyebrow{text-shadow:0 0 14px rgba(34,211,238,.18)}
+@media (prefers-reduced-motion:reduce){.eq i,.sb::after{animation:none!important}}
+
+/* ===== NGUỒN HÌNH THẬT ===== */
+.hide{display:none!important}
+.vmedia{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000}
+.vmedia.show{display:block}
+.vpanel{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px 28px;background:radial-gradient(520px 300px at 50% 40%,rgba(34,211,238,.12),transparent 70%),#050a18}
+.vpanel.show{display:flex}
+.vpanel .vi{width:64px;height:64px;border-radius:20px;display:flex;align-items:center;justify-content:center;color:var(--cy);background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.35);box-shadow:0 0 30px rgba(34,211,238,.2)}
+.vpanel .vt{font-size:18px;font-weight:800}
+.vpanel .vd{max-width:420px;font-size:13px;line-height:1.6;color:var(--mut)}
+.fbtn{position:absolute;right:16px;top:64px;z-index:4;min-height:36px;padding:0 12px;font-size:12px;background:rgba(7,12,26,.78);backdrop-filter:blur(8px)}
+.simnote{left:16px;top:118px;font-size:11px;color:#FDE68A;border-color:rgba(245,158,11,.4)}
+</style>
+</helmet>
+
+<div class="vd {{lvCls}}" style="display:flex;flex-wrap:wrap;align-items:stretch;min-height:100vh;width:100%">
+
+<sc-if value="{{showSidebar}}" hint-placeholder-val="{{ true }}">
+<aside class="sb {{sbCls}}">
+  <div style="display:flex;align-items:center;gap:12px;padding:2px 4px">
+    <svg width="38" height="38" viewBox="0 0 40 40" fill="none" aria-hidden="true" style="flex:0 0 auto;filter:drop-shadow(0 0 8px rgba(34,211,238,.6))">
+      <g class="logo-ring"><path d="M20 3l14 8v18l-14 8L6 29V11z" stroke="#22D3EE" stroke-width="2" stroke-dasharray="40 12"/></g>
+      <circle cx="20" cy="20" r="5" stroke="#3B82F6" stroke-width="2"/>
+      <circle cx="20" cy="20" r="1.8" fill="#22D3EE"/>
+    </svg>
+    <div class="brandtxt">
+      <div style="font-weight:800;font-size:16px;letter-spacing:-.01em">VisionDrive <span style="color:var(--cy)">AI</span></div>
+      <div style="font-size:11px;color:var(--mut);letter-spacing:.06em">Road Intelligence</div>
+    </div>
+  </div>
+
+  <nav style="display:flex;flex-direction:column;gap:6px" aria-label="Điều hướng chính">
+    <div class="grp">Giám sát</div>
+    <button class="{{navLiveC}}" onClick="{{navLive}}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>
+      <span class="lbl">Live Vision</span>
+    </button>
+    <div class="grp" style="margin-top:10px">Phân tích</div>
+    <button class="{{navEvalC}}" onClick="{{navEval}}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+      <span class="lbl">Đánh giá mô hình</span>
+    </button>
+    <button class="{{navReportC}}" onClick="{{navReport}}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>
+      <span class="lbl">Báo cáo phiên</span>
+    </button>
+    <button class="{{navDataC}}" onClick="{{navData}}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+      <span class="lbl">Dữ liệu và nhãn</span>
+    </button>
+    <div class="grp" style="margin-top:10px">Hệ thống</div>
+    <button class="{{navSetC}}" onClick="{{navSet}}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+      <span class="lbl">Cài đặt</span>
+    </button>
+    <a class="nav" href="Landing.dc.html" style="text-decoration:none">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10M10 20v-6h4v6"/></svg>
+      <span class="lbl">Trang giới thiệu</span>
+    </a>
+  </nav>
+
+  <div class="botcard">
+    <sc-if value="{{botOk}}" hint-placeholder-val="{{ true }}">
+    <svg class="bot" width="56" height="56" viewBox="0 0 64 64" fill="none" role="img" aria-label="Trợ lý đang vui">
+      <line x1="32" y1="14" x2="32" y2="7" stroke="#22D3EE" stroke-width="2"/><circle cx="32" cy="5" r="3" fill="#22D3EE"/>
+      <rect x="8" y="14" width="48" height="38" rx="14" fill="#1a2442" stroke="#22D3EE" stroke-width="2"/>
+      <circle cx="24" cy="31" r="4" fill="#22D3EE"/><circle cx="40" cy="31" r="4" fill="#22D3EE"/>
+      <path d="M24 41q8 7 16 0" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    </sc-if>
+    <sc-if value="{{botWarn}}" hint-placeholder-val="{{ false }}">
+    <svg class="bot" width="56" height="56" viewBox="0 0 64 64" fill="none" role="img" aria-label="Trợ lý đang chú ý">
+      <line x1="32" y1="14" x2="32" y2="7" stroke="#FBBF24" stroke-width="2"/><circle cx="32" cy="5" r="3" fill="#FBBF24"/>
+      <rect x="8" y="14" width="48" height="38" rx="14" fill="#1a2442" stroke="#FBBF24" stroke-width="2"/>
+      <circle cx="24" cy="31" r="3.2" fill="#FBBF24"/><circle cx="40" cy="31" r="3.2" fill="#FBBF24"/>
+      <path d="M25 42h14" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    </sc-if>
+    <sc-if value="{{botBad}}" hint-placeholder-val="{{ false }}">
+    <svg class="bot" width="56" height="56" viewBox="0 0 64 64" fill="none" role="img" aria-label="Trợ lý đang lo lắng">
+      <line x1="32" y1="14" x2="32" y2="7" stroke="#F87171" stroke-width="2"/><circle cx="32" cy="5" r="3" fill="#F87171"/>
+      <rect x="8" y="14" width="48" height="38" rx="14" fill="#2a1a2e" stroke="#F87171" stroke-width="2"/>
+      <path d="M18 25l9 3M46 25l-9 3" stroke="#F87171" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="24" cy="33" r="3.4" fill="#F87171"/><circle cx="40" cy="33" r="3.4" fill="#F87171"/>
+      <path d="M24 46q8-6 16 0" stroke="#F87171" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M52 20q3 4 0 7q-3-3 0-7z" fill="#67e8f9"/>
+    </svg>
+    </sc-if>
+    <sc-if value="{{botIdle}}" hint-placeholder-val="{{ false }}">
+    <svg class="bot" width="56" height="56" viewBox="0 0 64 64" fill="none" role="img" aria-label="Trợ lý đang quan sát">
+      <line x1="32" y1="14" x2="32" y2="7" stroke="#8B96AD" stroke-width="2"/><circle cx="32" cy="5" r="3" fill="#8B96AD"/>
+      <rect x="8" y="14" width="48" height="38" rx="14" fill="#1a2442" stroke="#8B96AD" stroke-width="2"/>
+      <path d="M19 31h10M35 31h10" stroke="#8B96AD" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="32" cy="43" r="2.4" stroke="#8B96AD" stroke-width="2"/>
+    </svg>
+    </sc-if>
+    <div class="bubble">{{botText}}</div>
+  </div>
+
+  <button class="nav" onClick="{{toggleSb}}" aria-label="Thu gọn hoặc mở rộng thanh bên">
+    <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    <span class="lbl">Thu gọn</span>
+  </button>
+</aside>
+</sc-if>
+
+<main style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px;padding:20px 24px 28px">
+
+  <header style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+    <div>
+      <div class="eyebrow">VisionDrive AI · Nhận diện loại đường</div>
+      <h1 class="hx" style="margin:6px 0 0;font-size:28px;font-weight:800;letter-spacing:-.02em">{{pageTitle}}</h1>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+      <sc-if value="{{isLive}}" hint-placeholder-val="{{ true }}">
+      <div class="segs" role="group" aria-label="Nguồn hình">
+        <button class="seg {{srcCamera}}" onClick="{{setCamera}}">Camera</button>
+        <button class="seg {{srcVideo}}" onClick="{{setVideo}}">Video</button>
+        <button class="seg {{srcImage}}" onClick="{{setImage}}">Ảnh</button>
+        <button class="seg {{srcDemo}}" onClick="{{setDemo}}">Demo</button>
+      </div>
+      <div class="pill"><span class="dot {{dotCls}}"></span><span class="mono">{{liveText}}</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
+      <div class="pill mono">{{fps}} FPS</div>
+      <div class="pill mono">{{lat}} ms</div>
+      </sc-if>
+      <button class="btn" onClick="{{togglePresent}}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        {{presentText}}
+      </button>
+    </div>
+  </header>
+
+  <div class="tick" aria-hidden="true"><div class="tick-in">
+    <span><b>●</b> MODEL MobileNetV3 · ONNX CPU</span><span>SỐ LỚP <b>5</b></span><span>QUY ĐỊNH TT 38/2024/TT-BGTVT</span><span>TRẠNG THÁI <b>{{lvLabel}}</b></span><span>LOẠI ĐƯỜNG <b>{{roadLabel}}</b></span><span>{{fps}} FPS · {{lat}} ms</span><span>AI CHỈ HỖ TRỢ TÀI XẾ</span>
+    <span><b>●</b> MODEL MobileNetV3 · ONNX CPU</span><span>SỐ LỚP <b>5</b></span><span>QUY ĐỊNH TT 38/2024/TT-BGTVT</span><span>TRẠNG THÁI <b>{{lvLabel}}</b></span><span>LOẠI ĐƯỜNG <b>{{roadLabel}}</b></span><span>{{fps}} FPS · {{lat}} ms</span><span>AI CHỈ HỖ TRỢ TÀI XẾ</span>
+  </div></div>
+
+  <sc-if value="{{isLive}}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+
+    <div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px">
+
+      <section class="card" style="padding:12px">
+        <div class="frame">
+          <sc-if value="{{isHighway}}" hint-placeholder-val="{{ true }}">
+          <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Minh họa khung hình: đường cao tốc" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+            <defs>
+              <linearGradient id="skyHw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050a18"/><stop offset="1" stop-color="#1d4468"/></linearGradient>
+              <linearGradient id="roadHw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101a30"/><stop offset="1" stop-color="#1e2a4a"/></linearGradient>
+            </defs>
+            <rect width="800" height="190" fill="url(#skyHw)"/>
+            <polygon points="0,190 90,166 210,184 340,156 470,186 600,160 720,182 800,170 800,190" fill="#0c1a2e"/>
+            <rect y="190" width="800" height="260" fill="#08101d"/>
+            <ellipse cx="400" cy="190" rx="260" ry="26" fill="#22D3EE" opacity=".1"/>
+            <polygon points="395,190 405,190 800,450 0,450" fill="url(#roadHw)"/>
+            <polygon points="396,190 391,190 -40,450 20,450" fill="#2b3659"/>
+            <line x1="400" y1="190" x2="262" y2="450" stroke="#cbd5e1" stroke-opacity=".55" stroke-width="3" stroke-dasharray="16 20"/>
+            <line x1="402" y1="190" x2="540" y2="450" stroke="#cbd5e1" stroke-opacity=".55" stroke-width="3" stroke-dasharray="16 20"/>
+            <line x1="405" y1="190" x2="790" y2="450" stroke="#22D3EE" stroke-opacity=".5" stroke-width="3"/>
+            <rect x="352" y="128" width="96" height="26" rx="3" fill="#0b3b33" stroke="#34d399" stroke-opacity=".6"/>
+            <text x="400" y="146" text-anchor="middle" font-size="12" font-weight="700" fill="#e6faf3" font-family="Plus Jakarta Sans, sans-serif">CAO TỐC</text>
+            <rect x="358" y="154" width="3" height="36" fill="#1f2a44"/><rect x="439" y="154" width="3" height="36" fill="#1f2a44"/>
+          </svg>
+          </sc-if>
+          <sc-if value="{{isUrban}}" hint-placeholder-val="{{ false }}">
+          <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Minh họa khung hình: đường đôi đô thị" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+            <defs>
+              <linearGradient id="skyUr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0f24"/><stop offset="1" stop-color="#43306b"/></linearGradient>
+              <linearGradient id="roadUr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#121a30"/><stop offset="1" stop-color="#202b4c"/></linearGradient>
+            </defs>
+            <rect width="800" height="190" fill="url(#skyUr)"/>
+            <rect y="190" width="800" height="260" fill="#0a1020"/>
+            <polygon points="0,38 340,150 340,192 0,300" fill="#141b38"/>
+            <polygon points="800,26 462,150 462,192 800,318" fill="#121833"/>
+            <g stroke="#fbbf24" stroke-opacity=".5" stroke-width="3" stroke-dasharray="7 12">
+              <line x1="0" y1="88" x2="340" y2="158"/><line x1="0" y1="134" x2="340" y2="168"/><line x1="0" y1="182" x2="340" y2="177"/><line x1="0" y1="232" x2="340" y2="185"/>
+              <line x1="800" y1="76" x2="462" y2="156"/><line x1="800" y1="124" x2="462" y2="166"/><line x1="800" y1="176" x2="462" y2="176"/><line x1="800" y1="232" x2="462" y2="185"/>
+            </g>
+            <polygon points="394,190 406,190 800,450 0,450" fill="url(#roadUr)"/>
+            <polygon points="398,190 402,190 436,450 364,450" fill="#26304d"/>
+            <line x1="396" y1="190" x2="170" y2="450" stroke="#cbd5e1" stroke-opacity=".5" stroke-width="3" stroke-dasharray="16 20"/>
+            <line x1="404" y1="190" x2="630" y2="450" stroke="#cbd5e1" stroke-opacity=".5" stroke-width="3" stroke-dasharray="16 20"/>
+            <circle cx="400" cy="206" r="5" fill="#0f766e" opacity=".85"/><circle cx="400" cy="236" r="9" fill="#0f766e" opacity=".85"/><circle cx="400" cy="284" r="14" fill="#0f766e" opacity=".85"/><circle cx="400" cy="352" r="22" fill="#0f766e" opacity=".85"/>
+            <g fill="#fde68a"><circle cx="318" cy="150" r="2.5"/><circle cx="482" cy="150" r="2.5"/><circle cx="270" cy="136" r="3"/><circle cx="530" cy="136" r="3"/></g>
+          </svg>
+          </sc-if>
+          <sc-if value="{{isRural}}" hint-placeholder-val="{{ false }}">
+          <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Minh họa khung hình: đường ngoài khu dân cư" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+            <defs>
+              <linearGradient id="skyRu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1330"/><stop offset="1" stop-color="#2c5576"/></linearGradient>
+              <linearGradient id="roadRu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#111a2e"/><stop offset="1" stop-color="#1d2846"/></linearGradient>
+            </defs>
+            <rect width="800" height="190" fill="url(#skyRu)"/>
+            <polygon points="0,190 0,150 120,128 260,160 400,134 540,164 680,126 800,152 800,190" fill="#0e2230"/>
+            <rect y="190" width="800" height="260" fill="#0b1a17"/>
+            <g stroke="#14352c" stroke-width="2"><line x1="400" y1="190" x2="0" y2="300"/><line x1="400" y1="190" x2="0" y2="390"/><line x1="400" y1="190" x2="800" y2="300"/><line x1="400" y1="190" x2="800" y2="390"/></g>
+            <polygon points="397,190 403,190 650,450 150,450" fill="url(#roadRu)"/>
+            <line x1="400" y1="190" x2="400" y2="450" stroke="#fbbf24" stroke-width="3" stroke-dasharray="14 18" stroke-opacity=".8"/>
+            <line x1="397" y1="190" x2="150" y2="450" stroke="#cbd5e1" stroke-opacity=".5" stroke-width="3"/>
+            <line x1="403" y1="190" x2="650" y2="450" stroke="#cbd5e1" stroke-opacity=".5" stroke-width="3"/>
+            <g fill="#0f2a24"><circle cx="320" cy="194" r="9"/><circle cx="240" cy="212" r="16"/><circle cx="120" cy="246" r="28"/><circle cx="482" cy="193" r="8"/><circle cx="562" cy="214" r="15"/><circle cx="692" cy="250" r="27"/></g>
+            <g stroke="#475569" stroke-width="3"><line x1="356" y1="138" x2="356" y2="196"/><line x1="344" y1="146" x2="368" y2="146"/></g>
+          </svg>
+          </sc-if>
+          <sc-if value="{{isAlley}}" hint-placeholder-val="{{ false }}">
+          <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Minh họa khung hình: hẻm, ngõ" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+            <defs>
+              <radialGradient id="glowAl" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fcd34d" stop-opacity=".55"/><stop offset="1" stop-color="#fcd34d" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="800" height="450" fill="#0b1022"/>
+            <polygon points="0,0 340,120 340,236 0,450" fill="#1a2142"/>
+            <polygon points="800,0 460,120 460,236 800,450" fill="#151b38"/>
+            <polygon points="340,120 460,120 460,236 340,236" fill="#241d3d"/>
+            <ellipse cx="400" cy="178" rx="120" ry="90" fill="url(#glowAl)"/>
+            <polygon points="340,236 460,236 800,450 0,450" fill="#1d2644"/>
+            <polygon points="36,170 120,200 120,360 36,420" fill="#0e1430" stroke="#22D3EE" stroke-opacity=".35"/>
+            <polygon points="720,150 650,176 650,260 720,250" fill="#0e1430" stroke="#fbbf24" stroke-opacity=".4"/>
+            <polygon points="708,170 664,186 664,236 708,230" fill="#fbbf24" opacity=".22"/>
+            <path d="M0 96 Q 200 150 340 140" stroke="#050914" stroke-width="2" fill="none"/>
+            <path d="M800 80 Q 600 140 460 138" stroke="#050914" stroke-width="2" fill="none"/>
+            <line x1="400" y1="240" x2="400" y2="450" stroke="#22D3EE" stroke-opacity=".12" stroke-width="2"/>
+          </svg>
+          </sc-if>
+
+          <video id="vd-video" class="vmedia {{vidCls}}" muted playsinline></video>
+          <img id="vd-img" class="vmedia {{imgCls}}" alt="Ảnh đường do người dùng chọn">
+          <div class="vpanel {{panelCls}}">
+            <div class="vi">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+            </div>
+            <div class="vt">{{panelTitle}}</div>
+            <div class="vd">{{panelText}}</div>
+            <button class="btn btn-pri {{pickCls}}" onClick="{{pickFile}}">{{pickText}}</button>
+          </div>
+          <input id="vd-file" type="file" style="display:none" onChange="{{onFile}}">
+          <button class="btn fbtn {{chgCls}}" onClick="{{pickFile}}">Đổi tệp</button>
+          <div class="vig"></div>
+          <div class="roi"><span>VÙNG PHÂN TÍCH</span></div>
+
+          <sc-for list="{{boxes}}" as="b" hint-placeholder-count="2">
+          <div class="veh" style="left: {{b.lp}}%; top: {{b.tp}}%; width: {{b.wp}}%; height: {{b.hp}}%">
+            <i></i><i></i>
+            <div class="bb"></div>
+            <div class="bl">{{b.label}}</div>
+          </div>
+          </sc-for>
+
+          <sc-if value="{{showScan}}" hint-placeholder-val="{{ true }}">
+          <div class="scan"></div>
+          </sc-if>
+          <div class="cn tl"></div><div class="cn tr"></div><div class="cn bl"></div><div class="cn br"></div>
+          <div class="retic"><i></i><i></i><i></i><i></i></div>
+          <div class="rec"><i></i>AI VISION · LIVE</div>
+          <div class="telem"><span>LAT {{lat}}MS · {{fps}}FPS</span><span>CLS {{roadLabel}}</span><span>CONF {{confText}}</span></div>
+
+          <div class="fchip" style="left:16px;top:16px;flex-direction:column;align-items:flex-start;gap:4px">
+            <span style="font-size:10px;letter-spacing:.16em;color:var(--mut)">LOẠI ĐƯỜNG</span>
+            <span style="font-size:15px;font-weight:800">{{roadLabel}} <span class="mono" style="color:var(--cy);margin-left:6px">{{confText}}</span></span>
+          </div>
+          <div class="fchip" style="right:16px;top:16px">
+            <span class="dot {{dotCls}}"></span>
+            <span class="mono">{{srcLabel}}</span>
+          </div>
+          <div class="lvchip" style="position:absolute;left:16px;top:82px;backdrop-filter:blur(8px)">{{lvLabel}}</div>
+          <div class="fchip simnote {{simCls}}">Hình thật · nhận diện đang mô phỏng</div>
+
+          <sc-if value="{{showBanner}}" hint-placeholder-val="{{ false }}">
+          <div class="banner" role="alert">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>
+            {{bannerText}}
+          </div>
+          </sc-if>
+          <div class="sign" aria-label="Giới hạn gợi ý">{{signText}}</div>
+        </div>
+      </section>
+
+      <section class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px">
+          <button class="btn btn-pri" onClick="{{togglePlay}}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg>
+            {{playText}}
+          </button>
+          <div style="flex:1 1 260px;min-width:200px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--mut)">
+              <span>Tốc độ xe ({{speedMode}})</span>
+              <span class="mono" style="color:var(--tx);font-size:14px;font-weight:700">{{speed}} km/h</span>
+            </div>
+            <input type="range" min="0" max="140" step="1" value="{{speed}}" onChange="{{onSlider}}" aria-label="Tốc độ xe mô phỏng">
+          </div>
+          <button class="btn" onClick="{{autoSpeed}}">Về tự động</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+          <span class="eyebrow" style="margin-right:6px">Khóa loại đường</span>
+          <sc-for list="{{locks}}" as="l" hint-placeholder-count="5">
+          <button class="{{l.cls}}" onClick="{{l.pick}}">{{l.label}}</button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section class="card" style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px">
+          <span class="eyebrow">Timeline phiên · mô phỏng 40 giây</span>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--mut)">
+            <span><span class="sw c0"></span> Cao tốc</span>
+            <span><span class="sw c1"></span> Đô thị đôi</span>
+            <span><span class="sw c2"></span> Ngoài khu dân cư</span>
+            <span><span class="sw c3"></span> Hẻm</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:2px">
+          <sc-for list="{{cells}}" as="c" hint-placeholder-count="40">
+          <div class="{{c.cls}}"></div>
+          </sc-for>
+        </div>
+        <svg viewBox="0 0 400 90" preserveAspectRatio="none" style="width:100%;height:110px;display:block" role="img" aria-label="Biểu đồ tốc độ và giới hạn theo thời gian">
+          <g stroke="#1F2A44" stroke-width="1" stroke-dasharray="2 6" vector-effect="non-scaling-stroke"><line x1="0" y1="21" x2="400" y2="21"/><line x1="0" y1="42" x2="400" y2="42"/><line x1="0" y1="63" x2="400" y2="63"/></g>
+          <line x1="0" y1="84" x2="400" y2="84" stroke="#1F2A44" stroke-width="1" vector-effect="non-scaling-stroke"/>
+          <polyline points="{{limitPts}}" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/>
+          <defs><linearGradient id="spFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22D3EE" stop-opacity=".38"/><stop offset="1" stop-color="#22D3EE" stop-opacity="0"/></linearGradient></defs>
+          <polygon points="{{speedPts}} 395,84 5,84" fill="url(#spFill)"/>
+          <polyline points="{{speedPts}}" fill="none" stroke="#22D3EE" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="filter:drop-shadow(0 0 4px rgba(34,211,238,.7))"/>
+          <line x1="{{curX}}" y1="2" x2="{{curX}}" y2="86" stroke="#E6EAF2" stroke-opacity=".7" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--mut)">
+          <span><span class="sw" style="background:#22D3EE"></span> Tốc độ xe</span>
+          <span><span class="sw" style="background:#F59E0B"></span> Giới hạn gợi ý</span>
+        </div>
+      </section>
+    </div>
+
+    <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px">
+
+      <section class="card" style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <span class="eyebrow">Loại đường</span>
+          <span class="lvchip">{{limitChip}}</span>
+        </div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+          <div style="font-size:24px;font-weight:800;line-height:1.15;letter-spacing:-.01em">{{roadLabel}}</div>
+          <div class="mono" style="font-size:34px;font-weight:700;color:var(--cy);line-height:1">{{confText}}</div>
+        </div>
+        <div style="font-size:12px;line-height:1.5;color:var(--mut)">{{ruleText}}</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{bars}}" as="c" hint-placeholder-count="5">
+          <div class="{{c.cls}}">
+            <span>{{c.name}}</span>
+            <div class="track"><div class="fill" style="width: {{c.v}}%"></div></div>
+            <span class="mono" style="text-align:right">{{c.v}}%</span>
+          </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section class="card hudc" style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <span class="eyebrow">Speed HUD</span>
+          <span class="lvchip">{{lvLabel}}</span>
+        </div>
+        <svg viewBox="0 0 220 130" style="width:100%;max-width:340px;display:block;margin:0 auto" role="img" aria-label="Đồng hồ tốc độ">
+          <path d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="#1F2A44" stroke-width="14" stroke-linecap="round"/>
+          <g stroke="#3a4668" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="10" y1="110" x2="4" y2="110"/>
+            <line x1="19.9" y1="66.6" x2="14.5" y2="64"/>
+            <line x1="47.7" y1="31.8" x2="43.9" y2="27.1"/>
+            <line x1="87.8" y1="12.5" x2="86.4" y2="6.7"/>
+            <line x1="132.3" y1="12.5" x2="133.6" y2="6.7"/>
+            <line x1="172.4" y1="31.8" x2="176.1" y2="27.1"/>
+            <line x1="200.1" y1="66.6" x2="205.5" y2="64"/>
+            <line x1="210" y1="110" x2="216" y2="110"/>
+          </g>
+          <circle class="gring" cx="110" cy="110" r="104" fill="none" stroke="rgba(34,211,238,.18)" stroke-width="1" stroke-dasharray="2 8"/>
+          <path class="garc" d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke-width="14" stroke-linecap="round" stroke-dasharray="282.74" stroke-dashoffset="{{gOff}}"/>
+          <line class="gneedle" x1="{{mx1}}" y1="{{my1}}" x2="{{mx2}}" y2="{{my2}}" stroke="#E6EAF2" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="110" cy="110" r="4" fill="#0B1020" stroke="#22D3EE" stroke-width="2"/>
+          <text x="110" y="92" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="46" font-weight="700" fill="#E6EAF2">{{speed}}</text>
+          <text x="110" y="110" text-anchor="middle" font-size="10" letter-spacing="2" fill="#8B96AD" font-family="Plus Jakarta Sans, sans-serif">KM/H</text>
+          <text x="20" y="127" font-size="9" fill="#8B96AD" font-family="JetBrains Mono, monospace">0</text>
+          <text x="200" y="127" text-anchor="end" font-size="9" fill="#8B96AD" font-family="JetBrains Mono, monospace">140</text>
+        </svg>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+          <div class="stat"><div class="eyebrow" style="font-size:9px">Giới hạn</div><div class="mono" style="font-size:20px;font-weight:700;margin-top:4px">{{limitText}}</div></div>
+          <div class="stat"><div class="eyebrow" style="font-size:9px">Chênh lệch</div><div class="mono lvx" style="font-size:20px;font-weight:700;margin-top:4px;color:var(--lvt)">{{diffShort}}</div></div>
+          <div class="stat"><div class="eyebrow" style="font-size:9px">Chế độ</div><div style="font-size:14px;font-weight:700;margin-top:7px">{{speedMode}}</div></div>
+        </div>
+        <div style="font-size:13px;line-height:1.5;color:var(--lvt);font-weight:600">{{lvMsg}}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="btn btn-pri" style="flex:1 1 150px" onClick="{{openWhy}}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg>
+            Vì sao cảnh báo?
+          </button>
+          <button class="btn" style="flex:1 1 130px" onClick="{{openWrong}}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>
+            Báo nhãn sai
+          </button>
+        </div>
+      </section>
+
+      <p style="margin:0;font-size:11px;line-height:1.55;color:#6b7794">Giới hạn gợi ý và số liệu FPS, độ trễ, độ tin cậy trong bản mockup là giá trị mô phỏng. Khi triển khai, đối chiếu bảng luật với Thông tư 38/2024/TT-BGTVT; khu đông dân cư được xác định bằng biển báo.</p>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{pgEval}}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+      <span class="badge-s">DỮ LIỆU MẪU</span>
+      <span style="font-size:13px;line-height:1.5;color:var(--mut)">Số liệu minh họa trên {{ev.n}} ảnh kiểm thử. Thay bằng kết quả thật sau khi huấn luyện xong.</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+      <div class="card kpi"><div class="eyebrow">Accuracy</div><div class="mono" style="font-size:34px;font-weight:700;color:var(--cy);line-height:1.1">{{ev.acc}}</div><div style="font-size:12px;color:var(--mut)">Tỉ lệ đoán đúng loại đường</div></div>
+      <div class="card kpi"><div class="eyebrow">Macro-F1</div><div class="mono" style="font-size:34px;font-weight:700;color:var(--cy);line-height:1.1">{{ev.f1}}</div><div style="font-size:12px;color:var(--mut)">Trung bình F1 của 5 lớp</div></div>
+      <div class="card kpi"><div class="eyebrow">Tốc độ xử lý</div><div class="mono" style="font-size:34px;font-weight:700;color:var(--cy);line-height:1.1">24 FPS</div><div style="font-size:12px;color:var(--mut)">Đo trên laptop, chỉ dùng CPU (mẫu)</div></div>
+      <div class="card kpi"><div class="eyebrow">Độ trễ / khung hình</div><div class="mono" style="font-size:34px;font-weight:700;color:var(--cy);line-height:1.1">38 ms</div><div style="font-size:12px;color:var(--mut)">Từ nhận hình đến có nhãn (mẫu)</div></div>
+    </div>
+    <section class="card" style="padding:18px 20px">
+      <div class="eyebrow">Ma trận nhầm lẫn · hàng: nhãn thật, cột: mô hình đoán</div>
+      <div style="overflow-x:auto;margin-top:14px">
+        <div class="cm">
+          <div class="h"></div>
+          <sc-for list="{{cmHead}}" as="h" hint-placeholder-count="5">
+          <div class="h">{{h}}</div>
+          </sc-for>
+          <sc-for list="{{cmRows}}" as="r" hint-placeholder-count="5">
+          <div style="display:contents">
+            <div class="rl">{{r.name}}</div>
+            <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="5">
+            <div style="background: {{c.bg}}; color: {{c.fg}}">{{c.v}}</div>
+            </sc-for>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;line-height:1.6;color:var(--mut)">Ô xanh là đoán đúng, ô đỏ là các cặp hay nhầm. Cặp nhầm nhiều nhất thường là đường đôi đô thị với phố hai chiều.</div>
+    </section>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+      <section class="card" style="flex:1 1 360px;min-width:0;padding:18px 20px">
+        <div class="eyebrow" style="margin-bottom:12px">Kết quả theo từng lớp</div>
+        <div class="trow hd"><span>Lớp</span><span>Precision</span><span>Recall</span><span>F1</span></div>
+        <sc-for list="{{clsRows}}" as="k" hint-placeholder-count="5">
+        <div class="trow"><span style="font-weight:700">{{k.name}}</span><span class="mono">{{k.p}}</span><span class="mono">{{k.r}}</span><span class="mono" style="color:var(--cy)">{{k.f}}</span></div>
+        </sc-for>
+      </section>
+      <section class="card" style="flex:1 1 360px;min-width:0;padding:18px 20px">
+        <div class="eyebrow" style="margin-bottom:12px">So sánh phương pháp (mẫu)</div>
+        <div class="trow hd" style="grid-template-columns:minmax(150px,2fr) minmax(70px,1fr)"><span>Phương pháp</span><span>Accuracy</span></div>
+        <div class="trow" style="grid-template-columns:minmax(150px,2fr) minmax(70px,1fr)"><span>Baseline: CNN nhỏ tự dựng</span><span class="mono">71.0%</span></div>
+        <div class="trow" style="grid-template-columns:minmax(150px,2fr) minmax(70px,1fr)"><span>MobileNetV3, học chuyển giao</span><span class="mono">{{ev.acc}}</span></div>
+        <div class="trow" style="grid-template-columns:minmax(150px,2fr) minmax(70px,1fr)"><span>Thêm làm mượt theo thời gian (video)</span><span class="mono" style="color:var(--cy)">91.0%</span></div>
+        <div style="margin-top:12px;font-size:12px;line-height:1.6;color:var(--mut)">Dòng cuối đo trên video thay vì từng ảnh, nên cần chia dữ liệu theo video để kết quả đáng tin.</div>
+      </section>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{pgReport}}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+      <span style="font-size:13px;line-height:1.5;color:var(--mut)">Tính trực tiếp từ phiên mô phỏng đang chạy ở Live Vision.</span>
+      <button class="btn" onClick="{{resetReport}}">Đặt lại phiên</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:stretch">
+      <section class="card" style="flex:1 1 280px;min-width:0;padding:22px 24px;display:flex;flex-direction:column;gap:8px">
+        <div class="eyebrow">Điểm an toàn</div>
+        <div class="mono" style="font-size:72px;font-weight:700;line-height:1;color: {{repCol}}">{{repScore}}</div>
+        <div style="font-size:15px;font-weight:700">{{repMsg}}</div>
+        <div style="font-size:12px;line-height:1.6;color:var(--mut)">Điểm = 100 trừ tỉ lệ giây vượt tốc (tính đủ) và giây chú ý (tính 40%) trên tổng thời gian đã xác định được loại đường.</div>
+      </section>
+      <div style="flex:2 1 420px;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
+        <div class="card kpi"><div class="eyebrow">Thời lượng</div><div class="mono" style="font-size:30px;font-weight:700;line-height:1.1">{{repDur}}</div><div style="font-size:12px;color:var(--mut)">phút:giây</div></div>
+        <div class="card kpi"><div class="eyebrow" style="color:#4ADE80">An toàn</div><div class="mono" style="font-size:30px;font-weight:700;line-height:1.1">{{rep.ok}} s</div><div style="font-size:12px;color:var(--mut)">trong giới hạn</div></div>
+        <div class="card kpi"><div class="eyebrow" style="color:#FBBF24">Chú ý</div><div class="mono" style="font-size:30px;font-weight:700;line-height:1.1">{{rep.warn}} s</div><div style="font-size:12px;color:var(--mut)">sắp chạm giới hạn</div></div>
+        <div class="card kpi"><div class="eyebrow" style="color:#F87171">Vượt tốc</div><div class="mono" style="font-size:30px;font-weight:700;line-height:1.1">{{rep.bad}} s</div><div style="font-size:12px;color:var(--mut)">trên giới hạn</div></div>
+      </div>
+    </div>
+    <section class="card" style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div class="eyebrow">Thời gian theo loại đường</div>
+      <sc-for list="{{repRoads}}" as="q" hint-placeholder-count="4">
+      <div style="display:grid;grid-template-columns:150px 1fr 54px;gap:12px;align-items:center;font-size:13px">
+        <span style="font-weight:700">{{q.name}}</span>
+        <div style="height:10px;border-radius:99px;background:#0B1020;border:1px solid #1a243d;overflow:hidden"><div style="height:100%;border-radius:99px;transition:width .6s ease;width: {{q.pct}}%; background: {{q.col}}"></div></div>
+        <span class="mono" style="text-align:right;color:var(--mut)">{{q.secs}} s</span>
+      </div>
+      </sc-for>
+    </section>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{pgData}}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <section class="card" style="padding:18px 20px">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px">
+        <div>
+          <div class="eyebrow">Mẫu nhãn sai đã báo</div>
+          <div style="margin-top:6px;font-size:13px;line-height:1.5;color:var(--mut)">Bấm "Báo nhãn sai" ở Live Vision để lưu khung hình mô hình đoán nhầm, dùng huấn luyện lại sau.</div>
+        </div>
+        <button class="btn" onClick="{{clearFlags}}">Xóa danh sách</button>
+      </div>
+      <sc-if value="{{hasFlags}}" hint-placeholder-val="{{ false }}">
+      <div class="frow hd"><span>#</span><span>Lúc</span><span>Mô hình đoán</span><span>Nhãn đúng</span></div>
+      <sc-for list="{{flags}}" as="f" hint-placeholder-count="2">
+      <div class="frow"><span class="mono" style="color:var(--cy)">{{f.n}}</span><span class="mono">{{f.time}}</span><span style="color:#F87171;font-weight:700">{{f.pred}}</span><span style="color:#4ADE80;font-weight:700">{{f.correct}}</span></div>
+      </sc-for>
+      </sc-if>
+      <sc-if value="{{noFlags}}" hint-placeholder-val="{{ true }}">
+      <div style="padding:28px 12px;text-align:center;font-size:14px;color:var(--mut);border:1px dashed var(--line);border-radius:12px">Chưa có mẫu nào. Khi mô hình đoán nhầm, hãy báo nhãn sai để lưu vào đây.</div>
+      </sc-if>
+    </section>
+    <section>
+      <div class="eyebrow" style="margin-bottom:12px">Hướng dẫn gán nhãn thống nhất cho cả nhóm</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+        <sc-for list="{{guide}}" as="g" hint-placeholder-count="5">
+        <div class="card" style="padding:18px 20px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-weight:800;font-size:15px">{{g.name}}</span><span class="mono" style="color:var(--cy);font-size:13px;font-weight:700">{{g.limit}} km/h</span></div>
+          <div style="font-size:13px;line-height:1.6;color:var(--mut)">{{g.cues}}</div>
+        </div>
+        </sc-for>
+      </div>
+    </section>
+    <section class="card" style="padding:18px 20px;font-size:13px;line-height:1.7;color:var(--mut)">
+      <div class="eyebrow" style="margin-bottom:8px">Quy tắc dữ liệu</div>
+      Chia tập huấn luyện, kiểm định và kiểm thử theo từng video, không chia theo khung hình, vì các khung hình liền kề gần như giống nhau. Ảnh quá tối, quá mờ hoặc bị che thì bỏ hoặc gắn nhãn "không xác định". Mỗi lớp nên có số ảnh gần bằng nhau.
+    </section>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{pgSet}}" hint-placeholder-val="{{ false }}">
+  <section class="card" style="padding:8px 24px;max-width:760px">
+    <div class="srow">
+      <div style="min-width:0"><div style="font-weight:700;font-size:15px">Cảnh báo bằng giọng nói tiếng Việt</div><div style="margin-top:4px;font-size:13px;line-height:1.5;color:var(--mut)">Đọc to khi chuyển sang trạng thái vượt tốc. Cần trình duyệt có giọng đọc tiếng Việt.</div></div>
+      <button class="sw-t {{voiceCls}}" role="switch" aria-checked="{{voiceChk}}" aria-label="Bật cảnh báo bằng giọng nói" onClick="{{togVoice}}"></button>
+    </div>
+    <div class="srow">
+      <div style="min-width:0"><div style="font-weight:700;font-size:15px">Hiện khung phát hiện phương tiện</div><div style="margin-top:4px;font-size:13px;line-height:1.5;color:var(--mut)">Vẽ khung và nhãn quanh xe, người trên khung hình.</div></div>
+      <button class="sw-t {{boxesCls}}" role="switch" aria-checked="{{boxesChk}}" aria-label="Hiện khung phát hiện" onClick="{{togBoxes}}"></button>
+    </div>
+    <div class="srow">
+      <div style="min-width:0"><div style="font-weight:700;font-size:15px">Hiệu ứng quét trên khung hình</div><div style="margin-top:4px;font-size:13px;line-height:1.5;color:var(--mut)">Dải sáng chạy dọc khung hình. Tắt đi nếu thấy rối mắt khi trình chiếu.</div></div>
+      <button class="sw-t {{scanCls}}" role="switch" aria-checked="{{scanChk}}" aria-label="Bật hiệu ứng quét" onClick="{{togScan}}"></button>
+    </div>
+    <div class="srow" style="flex-wrap:wrap">
+      <div style="min-width:0;flex:1 1 240px"><div style="font-weight:700;font-size:15px">Ngưỡng chuyển sang "Chú ý"</div><div style="margin-top:4px;font-size:13px;line-height:1.5;color:var(--mut)">Cảnh báo vàng khi tốc độ đạt tỉ lệ này so với giới hạn.</div></div>
+      <div style="flex:1 1 220px;display:flex;align-items:center;gap:12px"><input type="range" min="80" max="98" step="1" value="{{warnPct}}" onChange="{{onWarn}}" aria-label="Ngưỡng chú ý theo phần trăm giới hạn"><span class="mono" style="min-width:48px;text-align:right;font-weight:700">{{warnPct}}%</span></div>
+    </div>
+    <div class="srow">
+      <div style="min-width:0"><div style="font-weight:700;font-size:15px">Khôi phục cài đặt mặc định</div></div>
+      <button class="btn" onClick="{{resetSet}}">Khôi phục</button>
+    </div>
+  </section>
+  </sc-if>
+</main>
+
+<sc-if value="{{modalWhy}}" hint-placeholder-val="{{ false }}">
+<div class="ov" onClick="{{closeModal}}">
+  <div class="dlg" role="dialog" aria-modal="true" aria-label="Vì sao có cảnh báo này" onClick="{{stop}}">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px">
+      <h3 style="margin:0;font-size:20px;font-weight:800">Vì sao cảnh báo?</h3>
+      <span class="lvchip">{{lvLabel}}</span>
+    </div>
+    <div class="row"><span>Nhận diện</span><span style="font-weight:700;text-align:right">{{roadLabel}} · {{confText}}</span></div>
+    <div class="row"><span>Giới hạn gợi ý</span><span class="mono" style="font-weight:700">{{limitText}} km/h</span></div>
+    <div class="row"><span>Tốc độ hiện tại</span><span class="mono" style="font-weight:700">{{speed}} km/h</span></div>
+    <div class="row"><span>Kết luận</span><span style="font-weight:700;text-align:right;color:var(--lvt)">{{whyDiff}}</span></div>
+    <p style="margin:14px 0 0;font-size:12px;line-height:1.6;color:var(--mut)">{{ruleText}} Hệ thống chỉ gợi ý dựa trên hình ảnh, không thay thế biển báo thực tế.</p>
+    <div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="btn btn-pri" onClick="{{closeModal}}">Đã hiểu</button></div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{modalWrong}}" hint-placeholder-val="{{ false }}">
+<div class="ov" onClick="{{closeModal}}">
+  <div class="dlg" role="dialog" aria-modal="true" aria-label="Báo nhãn sai" onClick="{{stop}}">
+    <h3 style="margin:0 0 6px;font-size:20px;font-weight:800">Mô hình nhận sai loại đường?</h3>
+    <p style="margin:0 0 16px;font-size:13px;line-height:1.6;color:var(--mut)">Chọn nhãn đúng để lưu khung hình này làm mẫu huấn luyện lại. Hiện đang nhận diện: <b style="color:var(--tx)">{{roadLabel}}</b>.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <sc-for list="{{picks}}" as="p" hint-placeholder-count="5">
+      <button class="{{p.cls}}" onClick="{{p.pick}}">{{p.label}}</button>
+      </sc-for>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" onClick="{{closeModal}}">Hủy</button>
+      <button class="btn btn-pri" disabled="{{noPick}}" onClick="{{sendWrong}}">Gửi mẫu</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+<div class="toast" role="status">{{toast}}</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tickMs":{"editor":"int","default":1000,"min":400,"max":3000,"step":100,"unit":"ms"},"$preview":{"width":1440,"height":980}}'>
+class Component extends DCLogic {
+  state = {
+    tick: 14, playing: true, locked: -1, manual: -1, source: 'demo', nav: 'live', collapsed: false, present: false, modal: '', pick: -1, toast: '',
+    warnPct: 90, voice: false, showBoxes: true, showScan: true,
+    camState: 'idle', camMsg: '', hasVideo: false, hasImage: false,
+    rep: { n: 0, ok: 0, warn: 0, bad: 0, road: [0, 0, 0, 0] },
+    flags: []
+  };
+
+  D = {
+    names: ['Cao tốc', 'Đường đôi đô thị', 'Phố hai chiều', 'Ngoài khu dân cư', 'Hẻm / ngõ'],
+    scen: [
+      { chip: 'Cao tốc', cls: 0, limit: 120, main: 93, probs: [93, 3, 1, 3, 0],
+        rule: 'Cao tốc: giới hạn đọc theo biển báo cao tốc, tối đa 120 km/h.',
+        speeds: [88, 98, 106, 112, 117, 121, 126, 119, 111, 104],
+        boxes: [{ x: 360, y: 232, w: 58, h: 42, label: 'ô tô 96%' }, { x: 474, y: 206, w: 32, h: 24, label: 'xe tải 88%' }] },
+      { chip: 'Đô thị đôi', cls: 1, limit: 60, main: 91, probs: [2, 91, 5, 1, 1],
+        rule: 'Khu đông dân cư, đường đôi: gợi ý tối đa 60 km/h.',
+        speeds: [52, 50, 54, 57, 59, 63, 67, 61, 55, 52],
+        boxes: [{ x: 322, y: 240, w: 62, h: 44, label: 'ô tô 94%' }, { x: 478, y: 252, w: 34, h: 46, label: 'xe máy 89%' }, { x: 438, y: 208, w: 26, h: 22, label: 'ô tô 81%' }] },
+      { chip: 'Ngoài khu dân cư', cls: 3, limit: 90, main: 88, probs: [3, 1, 6, 88, 2],
+        rule: 'Ngoài khu đông dân cư: gợi ý tối đa 90 km/h tùy loại đường và loại xe.',
+        speeds: [74, 80, 85, 89, 92, 95, 88, 84, 79, 76],
+        boxes: [{ x: 370, y: 216, w: 36, h: 28, label: 'ô tô 92%' }] },
+      { chip: 'Hẻm / ngõ', cls: 4, limit: 30, main: 90, probs: [0, 3, 5, 2, 90],
+        rule: 'Hẻm, ngõ: ngưỡng thận trọng 30 km/h dùng cho demo (theo biển báo nếu có).',
+        speeds: [24, 26, 28, 30, 33, 31, 27, 25, 22, 20],
+        boxes: [{ x: 380, y: 262, w: 42, h: 60, label: 'xe máy 87%' }, { x: 306, y: 244, w: 22, h: 70, label: 'người 79%' }] }
+    ],
+    jit: [0, -2, 1, -1, 2, 0, -1, 1, 0, -2],
+    fpsJ: [0, 1, -1, 0, 2, -2, 1, 0, -1, 1],
+    latJ: [0, 3, -2, 1, 4, -3, 2, 0, -1, 2],
+    lv: {
+      ok: { label: 'AN TOÀN', msg: 'Tốc độ nằm trong giới hạn gợi ý. Tiếp tục duy trì.', bot: 'Mọi thứ đều ổn!' },
+      warn: { label: 'CHÚ Ý', msg: 'Sắp chạm giới hạn gợi ý. Nhả ga nhẹ.', bot: 'Hơi nhanh rồi nha...' },
+      bad: { label: 'VƯỢT TỐC', msg: 'Đang vượt giới hạn gợi ý. Giảm tốc độ ngay.', bot: 'Chậm lại nào!' },
+      idle: { label: 'ĐANG XÁC ĐỊNH', msg: 'Đang phân tích loại đường, chưa đủ độ tin cậy để cảnh báo.', bot: 'Đang quan sát...' }
+    },
+    titles: { live: 'Live Vision', eval: 'Đánh giá mô hình', report: 'Báo cáo phiên', data: 'Dữ liệu và nhãn', set: 'Cài đặt' },
+    src: { camera: 'CAMERA', video: 'VIDEO', image: 'ẢNH', demo: 'DEMO KỊCH BẢN' }
+  };
+
+  componentDidMount() {
+    if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      this._pm = (e) => {
+        if (this._raf) return;
+        const c = e.target && e.target.closest ? e.target.closest('.card') : null;
+        if (!c) return;
+        const x = e.clientX;
+        const y = e.clientY;
+        this._raf = requestAnimationFrame(() => {
+          this._raf = 0;
+          const r = c.getBoundingClientRect();
+          c.style.setProperty('--cx', (x - r.left) + 'px');
+          c.style.setProperty('--cy', (y - r.top) + 'px');
+        });
+      };
+      document.addEventListener('pointermove', this._pm, { passive: true });
+    }
+    const ms = Number(this.props.tickMs) || 1000;
+    this._t = setInterval(() => {
+      if (!this.state.playing) return;
+      const nt = (this.state.tick + 1) % 400;
+      const sn = this.snap(nt);
+      const R = this.state.rep;
+      const rep = { n: R.n + 1, ok: R.ok, warn: R.warn, bad: R.bad, road: R.road.slice() };
+      if (sn.level !== 'idle') rep[sn.level] += 1;
+      rep.road[sn.si] += 1;
+      this.setState({ tick: nt, rep: rep });
+      if (sn.level === 'bad' && this._last !== 'bad' && this.state.voice) this.speak();
+      this._last = sn.level;
+    }, ms);
+  }
+
+  snap(tick) {
+    const s = this.state;
+    const t = tick % 40;
+    const phase = Math.floor(t / 10);
+    const idx = t % 10;
+    const si = s.locked >= 0 ? s.locked : phase;
+    const sc = this.D.scen[si];
+    const speed = s.manual >= 0 ? s.manual : sc.speeds[idx];
+    let level = 'ok';
+    if (idx === 0) level = 'idle';
+    else if (speed > sc.limit) level = 'bad';
+    else if (speed > sc.limit * s.warnPct / 100) level = 'warn';
+    return { si: si, level: level };
+  }
+
+  speak() {
+    try {
+      if (!window.speechSynthesis) return;
+      const u = new SpeechSynthesisUtterance('Bạn đang vượt tốc độ cho phép');
+      u.lang = 'vi-VN';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* trình duyệt không hỗ trợ giọng đọc */ }
+  }
+
+  el(id) { return document.getElementById(id); }
+
+  stopCam() {
+    if (this._stream) { this._stream.getTracks().forEach((t) => t.stop()); this._stream = null; }
+  }
+
+  startCam() {
+    const md = navigator.mediaDevices;
+    if (!md || !md.getUserMedia) { this.setState({ camState: 'err', camMsg: 'Trình duyệt này không hỗ trợ camera.' }); return; }
+    this.setState({ camState: 'wait', camMsg: '' });
+    md.getUserMedia({ video: { facingMode: 'environment' }, audio: false }).then((stream) => {
+      if (this.state.source !== 'camera') { stream.getTracks().forEach((t) => t.stop()); return; }
+      this.stopCam();
+      this._stream = stream;
+      const v = this.el('vd-video');
+      if (v) {
+        v.removeAttribute('src');
+        v.srcObject = stream;
+        v.muted = true;
+        v.loop = false;
+        v.play().catch(() => {});
+      }
+      this.setState({ camState: 'ok' });
+    }).catch((err) => {
+      const n = err && err.name;
+      const m = n === 'NotAllowedError' || n === 'SecurityError'
+        ? 'Camera đang bị chặn. Hãy cho phép quyền camera cho trang này rồi bấm Thử lại. Nếu vẫn không được, hãy dùng Video hoặc Ảnh.'
+        : (n === 'NotFoundError' ? 'Không tìm thấy camera trên thiết bị này.' : 'Không mở được camera.');
+      this.setState({ camState: 'err', camMsg: m });
+    });
+  }
+
+  activate(k) {
+    this.stopCam();
+    const v = this.el('vd-video');
+    if (k === 'camera') { this.startCam(); return; }
+    if (k === 'video') {
+      if (v && this._vurl) { v.srcObject = null; v.src = this._vurl; v.loop = true; v.muted = true; v.play().catch(() => {}); }
+      return;
+    }
+    if (v) { v.pause(); }
+  }
+
+  note(m) {
+    this.setState({ toast: m });
+    clearTimeout(this._toastT);
+    this._toastT = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+
+  componentWillUnmount() {
+    this.stopCam();
+    if (this._vurl) URL.revokeObjectURL(this._vurl);
+    if (this._iurl) URL.revokeObjectURL(this._iurl);
+    clearInterval(this._t);
+    clearTimeout(this._toastT);
+    if (this._pm) document.removeEventListener('pointermove', this._pm);
+    if (this._raf) cancelAnimationFrame(this._raf);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const D = this.D;
+    const t = s.tick % 40;
+    const phase = Math.floor(t / 10);
+    const idx = t % 10;
+    const si = s.locked >= 0 ? s.locked : phase;
+    const sc = D.scen[si];
+    const manual = s.manual >= 0;
+    const speed = manual ? s.manual : sc.speeds[idx];
+    const limit = sc.limit;
+    const idle = idx === 0;
+
+    let level = 'ok';
+    if (idle) level = 'idle';
+    else if (speed > limit) level = 'bad';
+    else if (speed > limit * s.warnPct / 100) level = 'warn';
+    const L = D.lv[level];
+
+    const jit = D.jit[idx];
+    const probs = idle ? [28, 26, 16, 20, 10] : sc.probs.slice();
+    if (!idle) probs[sc.cls] = Math.min(99, sc.main + jit);
+    const conf = idle ? 0 : probs[sc.cls];
+    const bars = D.names.map((n, i) => ({ name: n, v: probs[i], cls: (!idle && i === sc.cls) ? 'bar on' : 'bar' }));
+
+    const flash = (m) => {
+      this.setState({ toast: m });
+      clearTimeout(this._toastT);
+      this._toastT = setTimeout(() => this.setState({ toast: '' }), 2600);
+    };
+    const go = (nav) => () => this.setState({ nav: nav });
+    const src = (k) => () => { this.setState({ source: k }); this.activate(k); };
+    const on = (c) => (c ? 'on' : '');
+
+    // gauge
+    const frac = Math.min(speed / 140, 1);
+    const gOff = (Math.PI * 90 * (1 - frac)).toFixed(1);
+    const ang = Math.PI * (1 - limit / 140);
+    const pt = (r) => [(110 + r * Math.cos(ang)).toFixed(1), (110 - r * Math.sin(ang)).toFixed(1)];
+    const m1 = pt(78);
+    const m2 = pt(103);
+
+    // timeline + chart
+    const Y = (v) => (84 - Math.min(v, 140) / 140 * 74).toFixed(1);
+    const sp = [];
+    const lp = [];
+    for (let p = 0; p < 4; p++) {
+      for (let i = 0; i < 10; i++) sp.push(((p * 10 + i) * 10 + 5) + ',' + Y(D.scen[p].speeds[i]));
+      lp.push((p * 100) + ',' + Y(D.scen[p].limit));
+      lp.push((p * 100 + 100) + ',' + Y(D.scen[p].limit));
+    }
+    const cells = [];
+    for (let i = 0; i < 40; i++) {
+      cells.push({ cls: 'cell c' + Math.floor(i / 10) + (i === t ? ' now' : (i < t ? ' past' : '')) });
+    }
+
+    // vehicles
+    const boxes = (s.showBoxes ? sc.boxes : []).map((b) => {
+      const x = b.x + (idx % 3) * 2;
+      const y = b.y + (idx % 2);
+      return { lp: (x / 8).toFixed(2), tp: (y / 4.5).toFixed(2), wp: (b.w / 8).toFixed(2), hp: (b.h / 4.5).toFixed(2), label: b.label };
+    });
+
+    const locks = [{ label: 'Tự động', cls: s.locked < 0 ? 'chip on' : 'chip', pick: () => this.setState({ locked: -1 }) }]
+      .concat(D.scen.map((x, i) => ({ label: x.chip, cls: s.locked === i ? 'chip on' : 'chip', pick: () => this.setState({ locked: i }) })));
+
+    const picks = D.names.map((n, i) => ({ label: n, cls: s.pick === i ? 'chip on' : 'chip', pick: () => this.setState({ pick: i }) }));
+
+    const diff = speed - limit;
+    const diffShort = idle ? '--' : (diff > 0 ? '+' + diff : String(diff));
+    const whyDiff = idle ? 'Chưa đủ độ tin cậy' : (diff > 0 ? 'Vượt ' + diff + ' km/h so với giới hạn' : 'Còn dư ' + (-diff) + ' km/h so với giới hạn');
+
+    // trang Đánh giá mô hình: ma trận nhầm lẫn mẫu, các chỉ số tính ra từ chính ma trận này
+    const M = [[54, 3, 0, 3, 0], [2, 52, 5, 1, 0], [0, 4, 50, 3, 3], [3, 0, 4, 52, 1], [0, 1, 4, 1, 54]];
+    const rs = M.map((r) => r.reduce((a, b) => a + b, 0));
+    const cs = [0, 1, 2, 3, 4].map((j) => M.reduce((a, r) => a + r[j], 0));
+    let evTot = 0;
+    let evOk = 0;
+    const f1s = [];
+    const clsRows = D.names.map((n, i) => {
+      const tp = M[i][i];
+      const pr = tp / cs[i];
+      const rc = tp / rs[i];
+      const f = 2 * pr * rc / (pr + rc);
+      f1s.push(f);
+      evTot += rs[i];
+      evOk += tp;
+      return { name: n, p: (pr * 100).toFixed(1) + '%', r: (rc * 100).toFixed(1) + '%', f: (f * 100).toFixed(1) + '%' };
+    });
+    const cmRows = M.map((r, i) => ({
+      name: D.names[i],
+      cells: r.map((v, j) => {
+        const p = v / rs[i];
+        if (i === j) return { v: v, bg: 'rgba(34,211,238,' + (0.18 + 0.7 * p).toFixed(2) + ')', fg: p > 0.6 ? '#031018' : '#E6EAF2' };
+        if (v > 0) return { v: v, bg: 'rgba(239,68,68,' + Math.min(0.15 + p * 2.5, 0.6).toFixed(2) + ')', fg: '#FECACA' };
+        return { v: v, bg: '#0F1627', fg: '#4b5775' };
+      })
+    }));
+    const ev = { acc: (evOk / evTot * 100).toFixed(1) + '%', f1: (f1s.reduce((a, b) => a + b, 0) / 5 * 100).toFixed(1) + '%', n: evTot };
+
+    // trang Báo cáo phiên: tính từ phiên mô phỏng
+    const R = s.rep;
+    const act = R.ok + R.warn + R.bad;
+    const score = act === 0 ? null : Math.max(0, Math.round(100 * (1 - (R.bad + 0.4 * R.warn) / act)));
+    const durS = Math.round(R.n * (Number(this.props.tickMs) || 1000) / 1000);
+    const mmss = (x) => String(Math.floor(x / 60)).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0');
+    const roadCols = ['#3B82F6', '#22D3EE', '#A78BFA', '#F472B6'];
+    const roadNm = ['Cao tốc', 'Đô thị đôi', 'Ngoài khu dân cư', 'Hẻm / ngõ'];
+    const repRoads = roadNm.map((n, i) => ({ name: n, secs: R.road[i], pct: Math.round(R.road[i] / Math.max(1, R.n) * 100), col: roadCols[i] }));
+    const repScore = score === null ? '--' : String(score);
+    const repCol = score === null ? '#94A3B8' : (score >= 85 ? '#4ADE80' : (score >= 60 ? '#FBBF24' : '#F87171'));
+    const repMsg = score === null ? 'Chưa có dữ liệu, hãy để demo chạy một lúc.' : (score >= 85 ? 'Lái xe an toàn' : (score >= 60 ? 'Cần chú ý tốc độ' : 'Vượt tốc nhiều'));
+
+    // trang Dữ liệu và nhãn
+    const G = [
+      ['Dải phân cách cứng, lan can hai bên, không có xe máy', 120],
+      ['Dải phân cách giữa, nhà và biển hiệu hai bên, nhiều ô tô và xe máy', 60],
+      ['Không có dải phân cách, xe máy nhiều, giao cắt dày', 50],
+      ['Ít nhà hai bên, cây hoặc ruộng, tầm nhìn xa', 90],
+      ['Đường hẹp, người đi bộ, xe đậu hai bên', 30]
+    ];
+    const guide = D.names.map((n, i) => ({ name: n, cues: G[i][0], limit: G[i][1] }));
+
+    const isDemo = s.source === 'demo';
+    const camOk = s.source === 'camera' && s.camState === 'ok';
+    const vidShow = camOk || (s.source === 'video' && s.hasVideo);
+    const imgShow = s.source === 'image' && s.hasImage;
+    const panelShow = !isDemo && !vidShow && !imgShow;
+    let panelTitle = '', panelText = '', pickText = '', pickShow = false;
+    if (s.source === 'camera') {
+      if (s.camState === 'err') { panelTitle = 'Không mở được camera'; panelText = s.camMsg; pickText = 'Thử lại'; pickShow = true; }
+      else { panelTitle = 'Đang mở camera...'; panelText = 'Nếu trình duyệt hỏi quyền camera, hãy bấm Cho phép.'; }
+    } else if (s.source === 'video') {
+      panelTitle = 'Chưa có video'; panelText = 'Chọn một video hành trình từ máy của bạn. Video chỉ phát trong trình duyệt, không được gửi đi đâu.'; pickText = 'Chọn video từ máy'; pickShow = true;
+    } else if (s.source === 'image') {
+      panelTitle = 'Chưa có ảnh'; panelText = 'Chọn một ảnh đường từ máy của bạn để xem. Ảnh chỉ hiển thị trong trình duyệt, không được gửi đi đâu.'; pickText = 'Chọn ảnh từ máy'; pickShow = true;
+    }
+    const chgShow = (s.source === 'video' && s.hasVideo) || (s.source === 'image' && s.hasImage);
+    const liveText = s.playing ? 'LIVE' : 'TẠM DỪNG';
+    const nav = s.nav;
+    const isLive = nav === 'live';
+
+    return {
+      lvCls: 'lv-' + level,
+      sbCls: s.collapsed ? 'sb-closed' : 'sb-open',
+      showSidebar: !s.present,
+      isLive: isLive,
+      pgEval: nav === 'eval', pgReport: nav === 'report', pgData: nav === 'data', pgSet: nav === 'set',
+      pageTitle: D.titles[nav] || 'Live Vision',
+
+      navLiveC: nav === 'live' ? 'nav on' : 'nav',
+      navEvalC: nav === 'eval' ? 'nav on' : 'nav',
+      navReportC: nav === 'report' ? 'nav on' : 'nav',
+      navDataC: nav === 'data' ? 'nav on' : 'nav',
+      navSetC: nav === 'set' ? 'nav on' : 'nav',
+      navLive: go('live'), navEval: go('eval'), navReport: go('report'), navData: go('data'), navSet: go('set'),
+      toggleSb: () => this.setState({ collapsed: !this.state.collapsed }),
+      togglePresent: () => this.setState({ present: !this.state.present }),
+      presentText: s.present ? 'Thoát trình chiếu' : 'Chế độ trình chiếu',
+
+      srcCamera: on(s.source === 'camera'), srcVideo: on(s.source === 'video'), srcImage: on(s.source === 'image'), srcDemo: on(s.source === 'demo'),
+      setCamera: src('camera'), setVideo: src('video'), setImage: src('image'), setDemo: src('demo'),
+      srcLabel: D.src[s.source],
+      dotCls: s.playing ? '' : 'off',
+      liveText: liveText,
+      fps: 24 + D.fpsJ[idx],
+      lat: 38 + D.latJ[idx],
+
+      isHighway: isDemo && si === 0, isUrban: isDemo && si === 1, isRural: isDemo && si === 2, isAlley: isDemo && si === 3,
+      boxes: isDemo ? boxes : [],
+      vidCls: vidShow ? 'show' : '', imgCls: imgShow ? 'show' : '',
+      panelCls: panelShow ? 'show' : '',
+      panelTitle: panelTitle, panelText: panelText, pickText: pickText,
+      pickCls: pickShow ? '' : 'hide',
+      chgCls: chgShow ? '' : 'hide',
+      simCls: isDemo ? 'hide' : '',
+      pickFile: () => {
+        const k = this.state.source;
+        if (k === 'camera') { this.startCam(); return; }
+        const inp = this.el('vd-file');
+        if (!inp) return;
+        inp.accept = k === 'video' ? 'video/*' : 'image/*';
+        this._pickKind = k;
+        inp.click();
+      },
+      onFile: (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+        const k = this._pickKind;
+        e.target.value = '';
+        if (k === 'video' && f.type.indexOf('video/') === 0) {
+          if (this._vurl) URL.revokeObjectURL(this._vurl);
+          this._vurl = URL.createObjectURL(f);
+          const v = this.el('vd-video');
+          if (v) { v.srcObject = null; v.src = this._vurl; v.loop = true; v.muted = true; v.play().catch(() => {}); }
+          this.setState({ hasVideo: true });
+          this.note('Đã mở video: ' + f.name);
+        } else if (k === 'image' && f.type.indexOf('image/') === 0) {
+          if (this._iurl) URL.revokeObjectURL(this._iurl);
+          this._iurl = URL.createObjectURL(f);
+          const im = this.el('vd-img');
+          if (im) im.src = this._iurl;
+          this.setState({ hasImage: true });
+          this.note('Đã mở ảnh: ' + f.name);
+        } else {
+          this.note('Tệp không đúng loại, hãy chọn ' + (k === 'video' ? 'video.' : 'ảnh.'));
+        }
+      },
+      roadLabel: idle ? 'Đang xác định...' : D.names[sc.cls],
+      confText: idle ? '--' : conf + '%',
+      showBanner: level === 'warn' || level === 'bad',
+      bannerText: level === 'bad' ? 'VƯỢT TỐC · giảm xuống dưới ' + limit + ' km/h' : 'CHÚ Ý · sắp chạm giới hạn ' + limit + ' km/h',
+      signText: idle ? '--' : String(limit),
+
+      togglePlay: () => {
+        const np = !this.state.playing;
+        this.setState({ playing: np });
+        const v = this.el('vd-video');
+        if (v && (this.state.source === 'video' || this.state.source === 'camera')) { if (np) v.play().catch(() => {}); else v.pause(); }
+      },
+      playText: s.playing ? 'Tạm dừng' : 'Chạy tiếp',
+      onSlider: (e) => this.setState({ manual: Number(e.target.value) }),
+      autoSpeed: () => this.setState({ manual: -1, locked: -1, playing: true }),
+      speed: speed,
+      speedMode: manual ? 'Thủ công' : 'Mô phỏng',
+      locks: locks,
+
+      cells: cells,
+      speedPts: sp.join(' '),
+      limitPts: lp.join(' '),
+      curX: t * 10 + 5,
+
+      limitChip: idle ? 'Chưa có giới hạn' : 'Giới hạn gợi ý ' + limit,
+      ruleText: idle ? 'Đang phân tích khung hình để xác định loại đường.' : sc.rule,
+      bars: bars,
+
+      gOff: gOff,
+      mx1: m1[0], my1: m1[1], mx2: m2[0], my2: m2[1],
+      limitText: idle ? '--' : String(limit),
+      diffShort: diffShort,
+      lvLabel: L.label,
+      lvMsg: L.msg,
+      whyDiff: whyDiff,
+
+      botOk: level === 'ok', botWarn: level === 'warn', botBad: level === 'bad', botIdle: level === 'idle',
+      botText: L.bot,
+
+      openWhy: () => this.setState({ modal: 'why' }),
+      openWrong: () => this.setState({ modal: 'wrong', pick: -1 }),
+      closeModal: () => this.setState({ modal: '' }),
+      stop: (e) => e.stopPropagation(),
+      modalWhy: s.modal === 'why',
+      modalWrong: s.modal === 'wrong',
+      picks: picks,
+      noPick: s.pick < 0,
+      sendWrong: () => {
+        const n = s.flags.length + 1;
+        const item = { n: n, time: mmss(durS), pred: idle ? 'Đang xác định' : D.names[sc.cls], correct: D.names[s.pick] };
+        this.setState({ modal: '', flags: s.flags.concat([item]) });
+        flash('Đã lưu mẫu #' + n + ' vào Dữ liệu và nhãn');
+      },
+      hasToast: s.toast !== '',
+      toast: s.toast,
+
+      ev: ev, cmHead: ['Cao tốc', 'Đô thị đôi', 'Phố 2 chiều', 'Ngoài KDC', 'Hẻm'], cmRows: cmRows, clsRows: clsRows,
+
+      rep: R, repScore: repScore, repCol: repCol, repMsg: repMsg, repDur: mmss(durS), repRoads: repRoads,
+      resetReport: () => { this.setState({ rep: { n: 0, ok: 0, warn: 0, bad: 0, road: [0, 0, 0, 0] } }); flash('Đã đặt lại phiên'); },
+
+      flags: s.flags, hasFlags: s.flags.length > 0, noFlags: s.flags.length === 0, guide: guide,
+      clearFlags: () => this.setState({ flags: [] }),
+
+      showScan: s.showScan,
+      voiceCls: s.voice ? 'on' : '', voiceChk: s.voice ? 'true' : 'false',
+      boxesCls: s.showBoxes ? 'on' : '', boxesChk: s.showBoxes ? 'true' : 'false',
+      scanCls: s.showScan ? 'on' : '', scanChk: s.showScan ? 'true' : 'false',
+      togVoice: () => {
+        const v = !this.state.voice;
+        this.setState({ voice: v });
+        if (v) this.speak();
+      },
+      togBoxes: () => this.setState({ showBoxes: !this.state.showBoxes }),
+      togScan: () => this.setState({ showScan: !this.state.showScan }),
+      warnPct: s.warnPct,
+      onWarn: (e) => this.setState({ warnPct: Number(e.target.value) }),
+      resetSet: () => { this.setState({ warnPct: 90, voice: false, showBoxes: true, showScan: true }); flash('Đã khôi phục cài đặt mặc định'); }
+    };
+  }
+}
+</script>
+</body>
+</html>
